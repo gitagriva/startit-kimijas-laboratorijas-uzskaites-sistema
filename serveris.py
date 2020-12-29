@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, json
 import dati
 
 
@@ -40,8 +40,10 @@ def lietotajs():
 
 @app.route('/api/v1/vielas')
 def vielas():
+    with open("dati/vielas.json", "r", encoding="utf-8") as f:
+      dati = json.loads(f.read())
     # pārveidojam par json pirms atgriežam
-    return jsonify(dati.vielas)
+    return jsonify(dati)
 
 
 @app.route('/api/v1/viela/<vielasID>')
@@ -55,6 +57,27 @@ def viela_id(vielasID):
             viela = v
     return jsonify(viela)
 
+@app.route('/api/v1/viela/<kategorija>/<id>/dzest')
+def dzest(kategorija, id):
+  if kategorija == "viela":
+    datne = "dati/vielas.json"
+  elif kategorija == "inventars":
+    datne = "fati/inventars.json"
+  else:
+    return "0"
+
+  with open(datne, "r", encoding = "utf-8") as f:
+    dati = json.loads(f.read())
+  
+  new_data = []
+  for v in dati:
+    if str(v['id']) != id:
+      new_data.append(v)
+
+  with open(datne, "w", encoding = "utf-8") as f:
+    f.write(json.dumps(new_data))
+  
+  return "1"
 
 if __name__ == "__main__":
     app.run("0.0.0.0", debug=True)
